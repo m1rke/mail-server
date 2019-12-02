@@ -1,37 +1,17 @@
-apiVersion: apps/v1beta2
-kind: DaemonSet
+apiVersion: extensions/v1beta1
+kind: Deployment
 metadata:
   name: mailu-front
   namespace: mailu-mailserver
-  labels:
-    k8s-app: mail-loadbalancer
-    component: ingress-controller
-    type: nginx
 spec:
-  selector:
-    matchLabels:
-      k8s-app: mail-loadbalancer
-      component: ingress-controller
-      type: nginx
+  replicas: 1
   template:
     metadata:
       labels:
-        k8s-app: mail-loadbalancer
-        component: ingress-controller
-        type: nginx
+        app: mailu-front
+        role: mail
+        tier: frontend
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: node-role.kubernetes.io/node
-                operator: Exists
-      nodeSelector:
-        node-role.kubernetes.io/node: ""
-      dnsPolicy: ClusterFirstWithHostNet
-      restartPolicy: Always
-      terminationGracePeriodSeconds: 60
       containers:
       - name: front
         image: mailu/nginx:master
@@ -107,14 +87,14 @@ metadata:
   name: front
   namespace: mailu-mailserver
   labels:
-    k8s-app: mail-loadbalancer
-    component: ingress-controller
-    type: nginx
+    app: mailu-front
+    role: mail
+    tier: frontend
 spec:
   selector:
-    k8s-app: mail-loadbalancer
-    component: ingress-controller
-    type: nginx
+    app: mailu-front
+    role: mail
+    tier: frontend
   ports:
   - name: pop3
     port: 110
