@@ -1,0 +1,51 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mailu-rainloop
+  namespace: mailu-mailserver
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mailu-rainloop
+        role: mail
+        tier: frontend
+    spec:
+      containers:
+      - name: rainloop
+        image: mailu/mailu-rainloop:1.7
+        imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: mailu-config
+        volumeMounts:
+          - mountPath: /data
+            name: maildata
+            subPath: webmail
+        ports:
+          - containerPort: 80
+      volumes:
+        - name: maildata
+          persistentVolumeClaim:
+            claimName: mail-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webmail
+  namespace: mailu-mailserver
+  labels:
+    app: mailu-rainloop
+    role: mail
+    tier: frontend
+spec:
+  selector:
+    app: mailu-rainloop
+    role: mail
+    tier: frontend
+  ports:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
