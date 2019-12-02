@@ -81,6 +81,7 @@ spec:
                 path: key.pem
             secretName: letsencrypt-certs-all
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -95,7 +96,7 @@ spec:
     app: mailu-front
     role: mail
     tier: frontend
-  ports:
+   ports:
   - name: pop3
     port: 110
     protocol: TCP
