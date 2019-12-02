@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: mailu-ingress
+  namespace: mailu-mailserver
+  annotations:
+    cert-manager.io/v1alpha2: "true"
+    cert-manager.io/v1alpha2: letsencrypt-production
+  labels:
+    app: mailu
+    role: mail
+    tier: backend
+spec:
+  tls:
+  - hosts:
+    - "mail.example.com"
+    secretName: letsencrypt-certs-all # If unsure how to generate these, check out https://github.com/ployst/docker-letsencrypt
+  rules:
+  - host: "mail.serapiondev.com"
+    http:
+      paths:
+      - path: "/"
+        backend:
+          serviceName: front
+          servicePort: 80
