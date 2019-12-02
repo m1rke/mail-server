@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: front
-        image: mailu/nginx:1.7
+        image: mailu/nginx:master
         imagePullPolicy: Always
         envFrom:
           - configMapRef:
