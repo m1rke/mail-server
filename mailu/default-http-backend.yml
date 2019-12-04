@@ -24,10 +24,10 @@ spec:
                     name: mysqldump
                     key: dbhostcrm
               - name: DB_HOST_USER
-                  valueFrom:
-                    configMapKeyRef:
-                      name: mysqldump
-                      key: dbhostuser
+                valueFrom:
+                  configMapKeyRef:
+                    name: mysqldump
+                    key: dbhostuser
               - name: DB_USER
                 valueFrom:
                   secretKeyRef:
