@@ -1,55 +1,49 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: batch/v2alpha1
+kind: ScheduledJob
 metadata:
-  name: default-http-backend
-  labels:
-    app: default-http-backend
-  namespace: kube-ingress
+  name: mysqldump
+  namespace: golden-key
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: default-http-backend
-  template:
-    metadata:
-      labels:
-        app: default-http-backend
+  schedule:  "* * * * *"
+  jobTemplate:
     spec:
-      terminationGracePeriodSeconds: 60
-      containers:
-      - name: default-http-backend
-        # Any image is permissible as long as:
-        # 1. It serves a 404 page at /
-        # 2. It serves 200 on a /healthz endpoint
-        image: gcr.io/google_containers/defaultbackend:1.4
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-            scheme: HTTP
-          initialDelaySeconds: 30
-          timeoutSeconds: 5
-        ports:
-        - containerPort: 8080
-        resources:
-          limits:
-            cpu: 10m
-            memory: 20Mi
-          requests:
-            cpu: 10m
-            memory: 20Mi
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: default-http-backend
-  namespace: kube-ingress
-  labels:
-    app: default-http-backend
-spec:
-  ports:
-  - port: 80
-    targetPort: 8080
-  selector:
-    app: default-http-backend
+      template:
+        spec:
+          containers:
+          - name: mysqldump
+            image: registry.gitlab.com/serapion/timvalores/gk-web/mysql-backup
+            env:
+              - name: ALL_DATABASES
+                valueFrom:
+                  configMapKeyRef:
+                    name: mysqldump
+                    key: all_databases
+              - name: DB_HOST_CRM
+                valueFrom:
+                  configMapKeyRef:
+                    name: mysqldump
+                    key: dbhostcrm
+                    - name: DB_HOST_USER
+                    valueFrom:
+                      configMapKeyRef:
+                        name: mysqldump
+                        key: dbhostuser
+              - name: DB_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: mysqldump
+                    key: dbuser
+              - name: DB_PASS
+                valueFrom:
+                  secretKeyRef:
+                    name: mysqldump
+                    key: dbpass
+            imagePullPolicy: Always
+            volumeMounts:
+              - mountPath: /mysqldump
+                name: mysqldump
+          volumes:
+            - name: mysqldump
+              hostPath:
+                path: /home/core/mysqldump
+          restartPolicy: OnFailure
