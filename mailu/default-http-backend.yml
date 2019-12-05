@@ -12,8 +12,8 @@ spec:
           containers:
           - name: mysqldump
             image: registry.gitlab.com/serapion/timvalores/gk-web/mysql-backup
-            imagePullSecrets:
-              - name: docker-registry
+          imagePullSecrets:
+            - name: docker-registry
             env:
               - name: ALL_DATABASES
                 valueFrom:
